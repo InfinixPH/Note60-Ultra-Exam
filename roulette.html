@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Questionnaire Roulette - Random Set Picker</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 30px;
+            padding: 20px;
+            max-width: 650px;
+            width: 100%;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+
+        h1 {
+            text-align: center;
+            color: #1e3c72;
+            margin-top: 0;
+            font-size: 1.8rem;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #718096;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+        }
+
+        .roulette-wrapper {
+            position: relative;
+            margin: 20px 0;
+        }
+
+        .wheel-container {
+            position: relative;
+            width: 280px;
+            height: 280px;
+            margin: 0 auto;
+        }
+
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100% !important;
+            height: 100% !important;
+            border-radius: 50%;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            transition: transform 0.1s ease;
+        }
+
+        .pointer {
+            position: absolute;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 20px solid transparent;
+            border-right: 20px solid transparent;
+            border-top: 40px solid gold;
+            filter: drop-shadow(0 2px 5px rgba(0,0,0,0.3));
+            z-index: 10;
+        }
+
+        button {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            font-size: 1.3rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin: 20px 0;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+        }
+
+        button:active {
+            transform: translateY(1px);
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .result-card {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 20px;
+            padding: 20px;
+            margin-top: 20px;
+            text-align: center;
+            min-height: 150px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .question-text {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #2d3748;
+        }
+
+        .link-button {
+            display: inline-block;
+            background: linear-gradient(135deg, #48bb78 0%, #2f855a 100%);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 5px;
+        }
+
+        .link-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .spin-count {
+            text-align: center;
+            color: #718096;
+            font-size: 0.9rem;
+            margin-top: 10px;
+        }
+
+        .history-section {
+            margin-top: 20px;
+            border-top: 1px solid #e2e8f0;
+            padding-top: 15px;
+        }
+
+        .history-title {
+            font-size: 0.9rem;
+            color: #4a5568;
+            margin-bottom: 8px;
+            text-align: center;
+        }
+
+        .history-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+            max-height: 120px;
+            overflow-y: auto;
+        }
+
+        .history-item {
+            background: #edf2f7;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .history-item:hover {
+            background: #cbd5e0;
+        }
+
+        @media (max-width: 480px) {
+            .wheel-container {
+                width: 250px;
+                height: 250px;
+            }
+            .question-text {
+                font-size: 1.1rem;
+            }
+            h1 {
+                font-size: 1.4rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>🎡 QUESTIONNAIRE ROULETTE 🎡</h1>
+    <div class="subtitle">Spin the wheel to randomly select a questionnaire set</div>
+    
+    <div class="roulette-wrapper">
+        <div class="wheel-container">
+            <div class="pointer"></div>
+            <canvas id="wheelCanvas" width="500" height="500"></canvas>
+        </div>
+    </div>
+
+    <button id="spinBtn" onclick="spinWheel()">🎲 SPIN THE WHEEL 🎲</button>
+    
+    <div class="result-card" id="resultCard">
+        <div class="question-text" id="questionText">
+            ✨ Click the button to spin! ✨
+        </div>
+        <div id="linkContainer"></div>
+    </div>
+    <div class="spin-count" id="spinCount">
+        Spins so far: 0
+    </div>
+
+    <div class="history-section">
+        <div class="history-title">📜 Recently Selected Sets (click to reopen)</div>
+        <div class="history-buttons" id="historyContainer"></div>
+    </div>
+</div>
+
+<script>
+    // ========== YOUR 20 GOOGLE FORM LINKS ==========
+    const SETS = [
+        { name: "Set 1", url: "https://docs.google.com/forms/d/e/1FAIpQLSeHpQSDFGjW5d3yHboSE4D_QshslNxZuikmeneb6ARftuF3lw/viewform" },
+        { name: "Set 2", url: "https://docs.google.com/forms/d/e/1FAIpQLSdXfW_rqCEOmDeXQOHIOb9sLNtlL16kzUJtSF-Q79NkzjHBCQ/viewform" },
+        { name: "Set 3", url: "https://docs.google.com/forms/d/e/1FAIpQLSe13C_V53ymlA1NshbOmGvDlL0-FOYuDLBIUiRis5fLNri2FQ/viewform" },
+        { name: "Set 4", url: "https://docs.google.com/forms/d/e/1FAIpQLSdoA9FpiCn-rmgZPMcf-Ljq18h6QVYInd_8Q4VvvXudqQ-Bvg/viewform" },
+        { name: "Set 5", url: "https://docs.google.com/forms/d/e/1FAIpQLSffkCh9xHtWfx4FglPH7MiVLZUVbbG7M2nyC1GFfwXvYBWRVg/viewform" },
+        { name: "Set 6", url: "https://forms.gle/6ms39r81DU58GqXe6" },
+        { name: "Set 7", url: "https://forms.gle/bQ9d4rAE5nQ4JLWa6" },
+        { name: "Set 8", url: "https://forms.gle/KuHW3ot8JC5WMbPB6" },
+        { name: "Set 9", url: "https://forms.gle/DVTTpApdT2qxZUHD7" },
+        { name: "Set 10", url: "https://forms.gle/z5ucuMpWnnVD3snt7" },
+        { name: "Set 11", url: "https://forms.gle/e154QuYQEa4p9xzX8" },
+        { name: "Set 12", url: "https://forms.gle/emvJBwbyrDAtj7566" },
+        { name: "Set 13", url: "https://forms.gle/6oG5cdZtspPUhQvr5" },
+        { name: "Set 14", url: "https://forms.gle/p7nApE3VbEV3Z7iv5" },
+        { name: "Set 15", url: "https://forms.gle/dMvDKbdQbBKSueHz8" },
+        { name: "Set 16", url: "https://docs.google.com/forms/d/e/1FAIpQLSftVcYHnfj9jkb4XrPjuSfpDOR0JXpCSeJY39OiGk0AnNt0ew/viewform" },
+        { name: "Set 17", url: "https://docs.google.com/forms/d/e/1FAIpQLScx5QHRe-6KIpJERyjo9x1kiyCUqsVRSycLKTeX7_eKog_Q7Q/viewform" },
+        { name: "Set 18", url: "https://docs.google.com/forms/d/e/1FAIpQLSdTNHWbs1CGLNoECir7f0wp2Q9QfAXh6n9pNm1MajRlvqAWvA/viewform" },
+        { name: "Set 19", url: "https://docs.google.com/forms/d/e/1FAIpQLSdYKy6JD7RhKNQZSn_wvPPOTtA9I6pd33Yxrcym4Qm5OFoB6w/viewform" },
+        { name: "Set 20", url: "https://docs.google.com/forms/d/e/1FAIpQLSeujgdKpQtNv4wGX4xFxGeSbGZgilIYSnOokzMdQorka_O4gQ/viewform" }
+    ];
+    // ================================================
+
+    const canvas = document.getElementById('wheelCanvas');
+    const ctx = canvas.getContext('2d');
+    
+    let currentRotation = 0;
+    let spinning = false;
+    let spinCount = 0;
+    let recentSelections = []; // Store last 10 selections
+    
+    const PI = Math.PI;
+    const TAU = PI * 2;
+    const SEGMENT_COUNT = SETS.length;
+    const SEGMENT_ANGLE = TAU / SEGMENT_COUNT;
+
+    // Colors for wheel segments (20 distinct colors)
+    const colors = [
+        '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7',
+        '#DDA0DD', '#98D8C8', '#F7B731', '#5D9BEC', '#F47B6E',
+        '#B5EAD7', '#C7CEEA', '#FFB347', '#A2D5C6', '#FF9F4A',
+        '#77DD77', '#FF6961', '#779BE7', '#FFB7B2', '#B5E3D5'
+    ];
+
+    function drawWheel(rotation) {
+        const size = canvas.width;
+        const centerX = size / 2;
+        const centerY = size / 2;
+        const radius = size / 2 - 10;
+        
+        ctx.clearRect(0, 0, size, size);
+        
+        for (let i = 0; i < SEGMENT_COUNT; i++) {
+            const start = i * SEGMENT_ANGLE + rotation;
+            const end = start + SEGMENT_ANGLE;
+            
+            // Draw segment
+            ctx.beginPath();
+            ctx.moveTo(centerX, centerY);
+            ctx.arc(centerX, centerY, radius, start, end);
+            ctx.closePath();
+            
+            ctx.fillStyle = colors[i % colors.length];
+            ctx.fill();
+            
+            // Draw border
+            ctx.strokeStyle = 'white';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            
+            // Draw text (Set number)
+            ctx.save();
+            ctx.translate(centerX, centerY);
+            ctx.rotate(start + SEGMENT_ANGLE / 2);
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillStyle = 'white';
+            ctx.font = `bold ${Math.min(16, radius / 6)}px "Segoe UI"`;
+            ctx.shadowBlur = 0;
+            const textRadius = radius * 0.7;
+            ctx.fillText(SETS[i].name, textRadius, 5);
+            ctx.restore();
+        }
+        
+        // Draw center circle
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, 20, 0, TAU);
+        ctx.fillStyle = 'white';
+        ctx.fill();
+        ctx.strokeStyle = '#333';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, 12, 0, TAU);
+        ctx.fillStyle = '#667eea';
+        ctx.fill();
+    }
+
+    function getSelectedSet(rotation) {
+        const pointerAngle = -PI / 2;
+        let wheelAngleAtPointer = (pointerAngle - rotation) % TAU;
+        if (wheelAngleAtPointer < 0) wheelAngleAtPointer += TAU;
+        const segmentIndex = Math.floor(wheelAngleAtPointer / SEGMENT_ANGLE);
+        return {
+            index: segmentIndex,
+            set: SETS[segmentIndex]
+        };
+    }
+
+    function updateResult(set, index) {
+        const questionText = document.getElementById('questionText');
+        const linkContainer = document.getElementById('linkContainer');
+        const spinCountSpan = document.getElementById('spinCount');
+        
+        // Create clickable link
+        linkContainer.innerHTML = `<a href="${set.url}" target="_blank" class="link-button" onclick="event.stopPropagation()">📋 OPEN ${set.name} →</a>`;
+        questionText.innerHTML = `🎯 YOU GOT: ${set.name} 🎯`;
+        
+        // Add to history
+        recentSelections.unshift({ ...set, timestamp: new Date().toLocaleTimeString() });
+        if (recentSelections.length > 10) recentSelections.pop();
+        updateHistoryDisplay();
+        
+        spinCount++;
+        spinCountSpan.textContent = `Spins so far: ${spinCount}`;
+        
+        // Add a subtle animation to result card
+        const resultCard = document.getElementById('resultCard');
+        resultCard.style.transform = 'scale(1.02)';
+        setTimeout(() => { resultCard.style.transform = 'scale(1)'; }, 200);
+    }
+
+    function updateHistoryDisplay() {
+        const historyContainer = document.getElementById('historyContainer');
+        if (recentSelections.length === 0) {
+            historyContainer.innerHTML = '<div style="color: #a0aec0;">No spins yet</div>';
+            return;
+        }
+        
+        historyContainer.innerHTML = recentSelections.map(item => 
+            `<div class="history-item" onclick="window.open('${item.url}', '_blank')">${item.name}</div>`
+        ).join('');
+    }
+
+    function spinWheel() {
+        if (spinning) return;
+        
+        spinning = true;
+        const spinBtn = document.getElementById('spinBtn');
+        spinBtn.disabled = true;
+        
+        // Random number of full spins (5-12) + random extra angle
+        const fullSpins = 5 + Math.floor(Math.random() * 10);
+        const extraAngle = Math.random() * TAU;
+        const targetRotation = currentRotation + (fullSpins * TAU) + extraAngle;
+        
+        const startTime = performance.now();
+        const duration = 3000; // 3 seconds animation
+        
+        function animate(currentTime) {
+            const elapsed = currentTime - startTime;
+            const progress = Math.min(1, elapsed / duration);
+            
+            // Easing out cubic
+            const easeOut = 1 - Math.pow(1 - progress, 3);
+            
+            currentRotation = currentRotation + (targetRotation - currentRotation) * easeOut;
+            drawWheel(currentRotation % TAU);
+            
+            if (progress < 1) {
+                requestAnimationFrame(animate);
+            } else {
+                // Animation complete
+                currentRotation = targetRotation % TAU;
+                drawWheel(currentRotation);
+                
+                const selected = getSelectedSet(currentRotation);
+                updateResult(selected.set, selected.index);
+                
+                spinning = false;
+                spinBtn.disabled = false;
+            }
+        }
+        
+        requestAnimationFrame(animate);
+    }
+
+    // Initialize wheel
+    function init() {
+        drawWheel(0);
+        
+        // Prevent zoom on double-tap for mobile
+        const container = document.querySelector('.container');
+        container.addEventListener('touchstart', (e) => {
+            if (e.touches.length > 1) e.preventDefault();
+        });
+    }
+    
+    init();
+</script>
+</body>
+</html>
