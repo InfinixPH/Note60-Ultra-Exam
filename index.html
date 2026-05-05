@@ -3,56 +3,87 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Questionnaire Roulette - Random Set Picker</title>
+    <title>NOTE60 ULTRA | Exam Roulette</title>
     <style>
         * {
+            margin: 0;
+            padding: 0;
             box-sizing: border-box;
-            user-select: none;
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
+            background: radial-gradient(circle at 20% 50%, rgba(15, 25, 45, 0.95), rgba(8, 12, 24, 0.98)),
+                        url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4MCIgaGVpZ2h0PSI4MCIgdmlld0JveD0iMCAwIDQwIDQwIj48cGF0aCBmaWxsPSIjMjgyYzNiIiBmaWxsLW9wYWNpdHk9IjAuMTUiIGQ9Ik0wIDBoNDB2NDBIMHoiLz48cGF0aCBmaWxsPSIjMjgyYzNiIiBmaWxsLW9wYWNpdHk9IjAuMDgiIGQ9Ik04IDBoMjR2NDBIOHoiLz48L3N2Zz4=');
             display: flex;
             justify-content: center;
             align-items: center;
-            margin: 0;
             padding: 20px;
+            font-family: 'Segoe UI', 'Poppins', 'Inter', system-ui, -apple-system, sans-serif;
         }
 
-        .container {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 30px;
-            padding: 20px;
-            max-width: 650px;
+        .glass-container {
+            max-width: 700px;
             width: 100%;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            background: rgba(20, 28, 40, 0.55);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-radius: 56px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 25px 45px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            padding: 24px;
+            transition: all 0.3s ease;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #00C9A7, #00B4D8);
+            padding: 6px 16px;
+            border-radius: 40px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: #0a0c15;
+            margin-bottom: 12px;
+            backdrop-filter: blur(4px);
         }
 
         h1 {
-            text-align: center;
-            color: #1e3c72;
-            margin-top: 0;
-            font-size: 1.8rem;
+            font-size: 2.2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #FFFFFF 0%, #00C9A7 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            letter-spacing: -0.5px;
+            text-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
 
         .subtitle {
-            text-align: center;
-            color: #718096;
-            margin-bottom: 20px;
-            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.65);
+            font-size: 0.85rem;
+            margin-top: 8px;
+            font-weight: 400;
         }
 
         .roulette-wrapper {
             position: relative;
-            margin: 20px 0;
+            margin: 20px 0 30px;
+            display: flex;
+            justify-content: center;
         }
 
         .wheel-container {
             position: relative;
-            width: 280px;
-            height: 280px;
+            width: 300px;
+            height: 300px;
             margin: 0 auto;
         }
 
@@ -63,179 +94,186 @@
             width: 100% !important;
             height: 100% !important;
             border-radius: 50%;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-            transition: transform 0.1s ease;
+            box-shadow: 0 20px 35px -10px rgba(0, 0, 0, 0.4), inset 0 1px 2px rgba(255,255,255,0.1);
+            transition: none;
         }
 
         .pointer {
             position: absolute;
-            top: -25px;
+            top: -28px;
             left: 50%;
             transform: translateX(-50%);
             width: 0;
             height: 0;
-            border-left: 20px solid transparent;
-            border-right: 20px solid transparent;
-            border-top: 40px solid gold;
-            filter: drop-shadow(0 2px 5px rgba(0,0,0,0.3));
+            border-left: 22px solid transparent;
+            border-right: 22px solid transparent;
+            border-top: 48px solid #00C9A7;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
             z-index: 10;
         }
+        .pointer::after {
+            content: "▼";
+            position: absolute;
+            top: -52px;
+            left: -12px;
+            font-size: 22px;
+            color: #00C9A7;
+            text-shadow: 0 2px 4px black;
+        }
 
-        button {
+        .spin-btn {
             display: block;
-            width: 100%;
-            padding: 15px;
-            font-size: 1.3rem;
-            font-weight: bold;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            border-radius: 50px;
+            width: 85%;
+            margin: 10px auto 20px;
+            padding: 16px 24px;
+            font-size: 1.4rem;
+            font-weight: 700;
+            background: linear-gradient(95deg, #FFFFFF12, #FFFFFF08);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(0, 201, 167, 0.5);
+            border-radius: 60px;
+            color: #A8F0E0;
             cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
-            margin: 20px 0;
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+            letter-spacing: 2px;
             box-shadow: 0 5px 15px rgba(0,0,0,0.2);
         }
-
-        button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+        .spin-btn:hover {
+            background: rgba(0, 201, 167, 0.2);
+            border-color: #00C9A7;
+            color: white;
+            transform: scale(1.02);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
         }
-
-        button:active {
-            transform: translateY(1px);
-        }
-
-        button:disabled {
+        .spin-btn:active { transform: scale(0.98); }
+        .spin-btn:disabled {
             opacity: 0.6;
             cursor: not-allowed;
+            transform: none;
         }
 
         .result-card {
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            border-radius: 20px;
+            background: rgba(10, 15, 25, 0.6);
+            backdrop-filter: blur(12px);
+            border-radius: 40px;
             padding: 20px;
-            margin-top: 20px;
+            margin: 15px 0;
             text-align: center;
-            min-height: 150px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
+            border: 1px solid rgba(255,255,255,0.15);
+            transition: all 0.2s ease;
         }
-
+        .result-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #00C9A7;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
         .question-text {
             font-size: 1.3rem;
-            font-weight: bold;
-            color: #2d3748;
+            font-weight: 600;
+            color: #F0F3FA;
+            margin: 8px 0;
         }
-
         .link-button {
-            display: inline-block;
-            background: linear-gradient(135deg, #48bb78 0%, #2f855a 100%);
-            color: white;
-            padding: 12px 24px;
-            border-radius: 50px;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: linear-gradient(135deg, #00C9A7, #009B82);
+            padding: 12px 28px;
+            border-radius: 40px;
             text-decoration: none;
-            font-weight: bold;
-            transition: transform 0.2s, box-shadow 0.2s;
-            margin-top: 5px;
+            color: white;
+            font-weight: 600;
+            margin-top: 10px;
+            transition: 0.2s;
+            border: 1px solid rgba(255,255,240,0.3);
+            font-size: 0.95rem;
         }
-
         .link-button:hover {
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-        }
-
-        .spin-count {
-            text-align: center;
-            color: #718096;
-            font-size: 0.9rem;
-            margin-top: 10px;
+            background: linear-gradient(135deg, #009B82, #006D5C);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
         }
 
         .history-section {
             margin-top: 20px;
-            border-top: 1px solid #e2e8f0;
-            padding-top: 15px;
+            padding-top: 12px;
+            border-top: 1px solid rgba(255,255,255,0.15);
         }
-
         .history-title {
-            font-size: 0.9rem;
-            color: #4a5568;
-            margin-bottom: 8px;
+            font-size: 0.75rem;
+            color: #aaa;
+            margin-bottom: 10px;
             text-align: center;
+            letter-spacing: 1px;
         }
-
         .history-buttons {
             display: flex;
             flex-wrap: wrap;
             gap: 8px;
             justify-content: center;
-            max-height: 120px;
-            overflow-y: auto;
         }
-
         .history-item {
-            background: #edf2f7;
+            background: rgba(255,255,245,0.08);
             padding: 5px 12px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            cursor: pointer;
-            transition: background 0.2s;
+            border-radius: 30px;
+            font-size: 0.75rem;
+            color: #bbb;
+            border: 1px solid rgba(0, 201, 167, 0.15);
+            font-weight: 500;
+        }
+        .spin-count {
+            text-align: center;
+            font-size: 0.7rem;
+            color: #888;
+            margin-top: 12px;
         }
 
-        .history-item:hover {
-            background: #cbd5e0;
-        }
-
-        @media (max-width: 480px) {
-            .wheel-container {
-                width: 250px;
-                height: 250px;
-            }
-            .question-text {
-                font-size: 1.1rem;
-            }
-            h1 {
-                font-size: 1.4rem;
-            }
+        @media (max-width: 500px) {
+            .glass-container { padding: 18px; }
+            .wheel-container { width: 260px; height: 260px; }
+            h1 { font-size: 1.8rem; }
+            .question-text { font-size: 1rem; }
         }
     </style>
 </head>
 <body>
-<div class="container">
-    <h1>🎡 QUESTIONNAIRE ROULETTE 🎡</h1>
-    <div class="subtitle">Spin the wheel to randomly select a questionnaire set</div>
-    
+
+<div class="glass-container">
+    <div class="header">
+        <div class="badge">✦ INFINIX ✦</div>
+        <h1>NOTE60 <span style="font-weight:300">INFINIX</span><br>Exam Roulette</h1>
+        <div class="subtitle">Randomized Questionnaire Selector</div>
+    </div>
+
     <div class="roulette-wrapper">
         <div class="wheel-container">
             <div class="pointer"></div>
-            <canvas id="wheelCanvas" width="500" height="500"></canvas>
+            <canvas id="wheelCanvas" width="540" height="540"></canvas>
         </div>
     </div>
 
-    <button id="spinBtn" onclick="spinWheel()">🎲 SPIN THE WHEEL 🎲</button>
-    
+    <button class="spin-btn" id="spinBtn">🎡 SPIN THE WHEEL 🎡</button>
+
     <div class="result-card" id="resultCard">
-        <div class="question-text" id="questionText">
-            ✨ Click the button to spin! ✨
-        </div>
+        <div class="result-label">▼ SELECTED SET ▼</div>
+        <div class="question-text" id="questionText">—</div>
         <div id="linkContainer"></div>
     </div>
-    <div class="spin-count" id="spinCount">
-        Spins so far: 0
-    </div>
+
+    <div class="spin-count" id="spinCount">📊 Spins: 0</div>
 
     <div class="history-section">
-        <div class="history-title">📜 Recently Selected Sets (click to reopen)</div>
+        <div class="history-title">📋 Recently Selected</div>
         <div class="history-buttons" id="historyContainer"></div>
     </div>
 </div>
 
 <script>
-    // ========== YOUR 20 GOOGLE FORM LINKS ==========
+    // ========= YOUR 20 SETS ==========
     const SETS = [
         { name: "Set 1", url: "https://docs.google.com/forms/d/e/1FAIpQLSeHpQSDFGjW5d3yHboSE4D_QshslNxZuikmeneb6ARftuF3lw/viewform" },
         { name: "Set 2", url: "https://docs.google.com/forms/d/e/1FAIpQLSdXfW_rqCEOmDeXQOHIOb9sLNtlL16kzUJtSF-Q79NkzjHBCQ/viewform" },
@@ -258,127 +296,139 @@
         { name: "Set 19", url: "https://docs.google.com/forms/d/e/1FAIpQLSdYKy6JD7RhKNQZSn_wvPPOTtA9I6pd33Yxrcym4Qm5OFoB6w/viewform" },
         { name: "Set 20", url: "https://docs.google.com/forms/d/e/1FAIpQLSeujgdKpQtNv4wGX4xFxGeSbGZgilIYSnOokzMdQorka_O4gQ/viewform" }
     ];
-    // ================================================
+    // ================================
 
     const canvas = document.getElementById('wheelCanvas');
     const ctx = canvas.getContext('2d');
-    
     let currentRotation = 0;
     let spinning = false;
     let spinCount = 0;
-    let recentSelections = []; // Store last 10 selections
-    
+    let recentSelections = [];
+    let animFrame = null;
+    let spinStartTime = 0;
+    let spinDuration = 2800; // Slightly longer for more natural feel
+    let startRotation = 0;
+    let targetRotation = 0;
+    let selectedSetIndex = null; // Store the randomly selected set before animating
+
     const PI = Math.PI;
     const TAU = PI * 2;
-    const SEGMENT_COUNT = SETS.length;
-    const SEGMENT_ANGLE = TAU / SEGMENT_COUNT;
+    const SEG_COUNT = SETS.length;
+    const SEG_ANGLE = TAU / SEG_COUNT;
 
-    // Colors for wheel segments (20 distinct colors)
     const colors = [
-        '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7',
-        '#DDA0DD', '#98D8C8', '#F7B731', '#5D9BEC', '#F47B6E',
-        '#B5EAD7', '#C7CEEA', '#FFB347', '#A2D5C6', '#FF9F4A',
-        '#77DD77', '#FF6961', '#779BE7', '#FFB7B2', '#B5E3D5'
+        '#C44545', '#3A7CA5', '#44B39D', '#E9B35F', '#B56576',
+        '#6D597A', '#4C9F70', '#E28413', '#2F4858', '#A23B72',
+        '#F18F01', '#1E6091', '#D9BF77', '#6C9EBF', '#A37C6B',
+        '#BC4A51', '#3D5A80', '#EE6C4D', '#5E548E', '#2D6A4F'
     ];
 
-    function drawWheel(rotation) {
-        const size = canvas.width;
-        const centerX = size / 2;
-        const centerY = size / 2;
-        const radius = size / 2 - 10;
-        
-        ctx.clearRect(0, 0, size, size);
-        
-        for (let i = 0; i < SEGMENT_COUNT; i++) {
-            const start = i * SEGMENT_ANGLE + rotation;
-            const end = start + SEGMENT_ANGLE;
-            
-            // Draw segment
+    function drawWheel(rot) {
+        const sz = canvas.width;
+        const cx = sz/2, cy = sz/2;
+        const rad = sz/2 - 10;
+        ctx.clearRect(0, 0, sz, sz);
+        for (let i = 0; i < SEG_COUNT; i++) {
+            const start = i * SEG_ANGLE + rot;
+            const end = start + SEG_ANGLE;
             ctx.beginPath();
-            ctx.moveTo(centerX, centerY);
-            ctx.arc(centerX, centerY, radius, start, end);
+            ctx.moveTo(cx, cy);
+            ctx.arc(cx, cy, rad, start, end);
             ctx.closePath();
-            
             ctx.fillStyle = colors[i % colors.length];
             ctx.fill();
-            
-            // Draw border
-            ctx.strokeStyle = 'white';
-            ctx.lineWidth = 2;
-            ctx.stroke();
-            
-            // Draw text (Set number)
             ctx.save();
-            ctx.translate(centerX, centerY);
-            ctx.rotate(start + SEGMENT_ANGLE / 2);
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillStyle = 'white';
-            ctx.font = `bold ${Math.min(16, radius / 6)}px "Segoe UI"`;
             ctx.shadowBlur = 0;
-            const textRadius = radius * 0.7;
-            ctx.fillText(SETS[i].name, textRadius, 5);
-            ctx.restore();
+            ctx.strokeStyle = 'rgba(255,255,200,0.5)';
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+            ctx.translate(cx, cy);
+            ctx.rotate(start + SEG_ANGLE/2);
+            ctx.fillStyle = '#FFFFFFEE';
+            ctx.font = `bold ${Math.min(18, rad/5.5)}px "Segoe UI", "Inter"`;
+            ctx.shadowColor = 'rgba(0,0,0,0.4)';
+            ctx.fillText(SETS[i].name, rad*0.68, 6);
+            ctx.setTransform(1,0,0,1,0,0);
         }
-        
-        // Draw center circle
         ctx.beginPath();
-        ctx.arc(centerX, centerY, 20, 0, TAU);
-        ctx.fillStyle = 'white';
+        ctx.arc(cx, cy, 22, 0, TAU);
+        ctx.fillStyle = '#1A1F2E';
+        ctx.shadowBlur = 0;
         ctx.fill();
-        ctx.strokeStyle = '#333';
-        ctx.lineWidth = 2;
-        ctx.stroke();
-        
         ctx.beginPath();
-        ctx.arc(centerX, centerY, 12, 0, TAU);
-        ctx.fillStyle = '#667eea';
+        ctx.arc(cx, cy, 16, 0, TAU);
+        ctx.fillStyle = '#00C9A7';
         ctx.fill();
     }
 
-    function getSelectedSet(rotation) {
-        const pointerAngle = -PI / 2;
-        let wheelAngleAtPointer = (pointerAngle - rotation) % TAU;
-        if (wheelAngleAtPointer < 0) wheelAngleAtPointer += TAU;
-        const segmentIndex = Math.floor(wheelAngleAtPointer / SEGMENT_ANGLE);
-        return {
-            index: segmentIndex,
-            set: SETS[segmentIndex]
-        };
+    // Calculate the rotation needed so that a specific segment aligns with the pointer
+    function getRotationForSegment(segmentIndex, currentRot) {
+        const pointerAngle = -PI / 2; // Pointer at top (12 o'clock)
+        // We want: pointerAngle = segmentCenterAngle + rotation
+        const segmentCenter = segmentIndex * SEG_ANGLE + SEG_ANGLE/2;
+        let neededRotation = pointerAngle - segmentCenter;
+        // Normalize to 0..TAU
+        neededRotation = ((neededRotation % TAU) + TAU) % TAU;
+        return neededRotation;
     }
 
-    function updateResult(set, index) {
-        const questionText = document.getElementById('questionText');
-        const linkContainer = document.getElementById('linkContainer');
-        const spinCountSpan = document.getElementById('spinCount');
+    // Pure random selection - 1/20 chance every spin
+    function getRandomSet() {
+        const randomIndex = Math.floor(Math.random() * SETS.length);
+        return { index: randomIndex, set: SETS[randomIndex] };
+    }
+
+    function animateSpin(now) {
+        const elapsed = now - spinStartTime;
+        let t = Math.min(1, elapsed / spinDuration);
         
-        // Create clickable link
-        linkContainer.innerHTML = `<a href="${set.url}" target="_blank" class="link-button" onclick="event.stopPropagation()">📋 OPEN ${set.name} →</a>`;
-        questionText.innerHTML = `🎯 YOU GOT: ${set.name} 🎯`;
+        // SUPER NATURAL EASING: easeOutQuart (slows down dramatically at the end)
+        // This creates that "almost stopping... then finally landing" feel
+        const easeOutQuart = 1 - Math.pow(1 - t, 4);
         
-        // Add to history
-        recentSelections.unshift({ ...set, timestamp: new Date().toLocaleTimeString() });
-        if (recentSelections.length > 10) recentSelections.pop();
-        updateHistoryDisplay();
+        const newRot = startRotation + (targetRotation - startRotation) * easeOutQuart;
+        currentRotation = newRot % TAU;
+        drawWheel(currentRotation);
         
+        if (t < 1) {
+            animFrame = requestAnimationFrame(animateSpin);
+        } else {
+            // Final exact position
+            currentRotation = targetRotation % TAU;
+            drawWheel(currentRotation);
+            
+            // Update UI with the pre-selected random set
+            updateUI(selectedSetIndex.set, selectedSetIndex.index);
+            
+            spinning = false;
+            document.getElementById('spinBtn').disabled = false;
+            cancelAnimationFrame(animFrame);
+        }
+    }
+
+    function updateUI(set, idx) {
+        const questionDiv = document.getElementById('questionText');
+        const linkDiv = document.getElementById('linkContainer');
+        questionDiv.innerHTML = `${set.name}`;
+        linkDiv.innerHTML = `<a href="${set.url}" target="_blank" class="link-button">📋 OPEN ${set.name} →</a>`;
+        recentSelections.unshift(set.name);
+        if (recentSelections.length > 6) recentSelections.pop();
+        updateHistory();
         spinCount++;
-        spinCountSpan.textContent = `Spins so far: ${spinCount}`;
-        
-        // Add a subtle animation to result card
-        const resultCard = document.getElementById('resultCard');
-        resultCard.style.transform = 'scale(1.02)';
-        setTimeout(() => { resultCard.style.transform = 'scale(1)'; }, 200);
+        document.getElementById('spinCount').innerHTML = `📊 Spins: ${spinCount}`;
+        const card = document.getElementById('resultCard');
+        card.style.transform = 'scale(1.01)';
+        setTimeout(() => { card.style.transform = 'scale(1)'; }, 180);
     }
 
-    function updateHistoryDisplay() {
-        const historyContainer = document.getElementById('historyContainer');
-        if (recentSelections.length === 0) {
-            historyContainer.innerHTML = '<div style="color: #a0aec0;">No spins yet</div>';
+    function updateHistory() {
+        const histDiv = document.getElementById('historyContainer');
+        if (!recentSelections.length) {
+            histDiv.innerHTML = '<span style="color:#666;font-size:0.7rem;">—</span>';
             return;
         }
-        
-        historyContainer.innerHTML = recentSelections.map(item => 
-            `<div class="history-item" onclick="window.open('${item.url}', '_blank')">${item.name}</div>`
+        histDiv.innerHTML = recentSelections.map(name => 
+            `<div class="history-item">${name}</div>`
         ).join('');
     }
 
@@ -386,56 +436,34 @@
         if (spinning) return;
         
         spinning = true;
-        const spinBtn = document.getElementById('spinBtn');
-        spinBtn.disabled = true;
+        const btn = document.getElementById('spinBtn');
+        btn.disabled = true;
         
-        // Random number of full spins (5-12) + random extra angle
-        const fullSpins = 5 + Math.floor(Math.random() * 10);
-        const extraAngle = Math.random() * TAU;
-        const targetRotation = currentRotation + (fullSpins * TAU) + extraAngle;
+        // STEP 1: Pick a random set (PURE RANDOM - 1/20 chance)
+        selectedSetIndex = getRandomSet();
         
-        const startTime = performance.now();
-        const duration = 3000; // 3 seconds animation
+        // STEP 2: Calculate where the wheel needs to stop to show that set
+        const targetStopRotation = getRotationForSegment(selectedSetIndex.index, currentRotation);
         
-        function animate(currentTime) {
-            const elapsed = currentTime - startTime;
-            const progress = Math.min(1, elapsed / duration);
-            
-            // Easing out cubic
-            const easeOut = 1 - Math.pow(1 - progress, 3);
-            
-            currentRotation = currentRotation + (targetRotation - currentRotation) * easeOut;
-            drawWheel(currentRotation % TAU);
-            
-            if (progress < 1) {
-                requestAnimationFrame(animate);
-            } else {
-                // Animation complete
-                currentRotation = targetRotation % TAU;
-                drawWheel(currentRotation);
-                
-                const selected = getSelectedSet(currentRotation);
-                updateResult(selected.set, selected.index);
-                
-                spinning = false;
-                spinBtn.disabled = false;
-            }
-        }
+        // STEP 3: Add multiple full rotations for spinning effect (4 to 9 full turns)
+        const fullSpins = 4 + Math.random() * 6; // 4 to 10 rotations
+        const finalTarget = targetStopRotation + (fullSpins * TAU);
         
-        requestAnimationFrame(animate);
+        startRotation = currentRotation;
+        targetRotation = finalTarget;
+        spinStartTime = performance.now();
+        
+        animFrame = requestAnimationFrame(animateSpin);
     }
 
-    // Initialize wheel
     function init() {
-        drawWheel(0);
-        
-        // Prevent zoom on double-tap for mobile
-        const container = document.querySelector('.container');
-        container.addEventListener('touchstart', (e) => {
-            if (e.touches.length > 1) e.preventDefault();
-        });
+        // Random initial rotation so wheel isn't always aligned the same way
+        currentRotation = Math.random() * TAU;
+        drawWheel(currentRotation);
+        document.getElementById('spinBtn').onclick = spinWheel;
+        updateHistory();
     }
-    
+
     init();
 </script>
 </body>
