@@ -377,6 +377,15 @@
             transform: none;
         }
 
+        .sound-note {
+            text-align: center;
+            margin: -6px 0 10px;
+            font-size: 0.68rem;
+            letter-spacing: 1px;
+            color: rgba(185,251,255,0.62);
+            text-transform: uppercase;
+        }
+
         .result-card {
             position: relative;
             background:
@@ -587,6 +596,10 @@
         ❄ SPIN THE ICE WHEEL
     </button>
 
+    <div class="sound-note" id="soundNote">
+        🔊 Roulette sound enabled
+    </div>
+
     <div class="result-card" id="resultCard">
         <div class="result-label">
             ▼ SELECTED SET ▼
@@ -634,6 +647,68 @@
 
     const canvas = document.getElementById('wheelCanvas');
     const ctx = canvas.getContext('2d');
+
+    let audioCtx = null;
+    let nextTickTime = 0;
+    let lastTickTime = 0;
+
+    function initAudio() {
+        if (!audioCtx) {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+
+        if (audioCtx.state === 'suspended') {
+            audioCtx.resume();
+        }
+    }
+
+    function playTick(volume = 0.16, pitch = 950) {
+        if (!audioCtx) return;
+
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        const filter = audioCtx.createBiquadFilter();
+
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(pitch, audioCtx.currentTime);
+
+        filter.type = 'highpass';
+        filter.frequency.setValueAtTime(650, audioCtx.currentTime);
+
+        gain.gain.setValueAtTime(volume, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.035);
+
+        osc.connect(filter);
+        filter.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.04);
+    }
+
+    function playLandSound() {
+        if (!audioCtx) return;
+
+        const now = audioCtx.currentTime;
+
+        const osc1 = audioCtx.createOscillator();
+        const gain1 = audioCtx.createGain();
+
+        osc1.type = 'triangle';
+        osc1.frequency.setValueAtTime(740, now);
+        osc1.frequency.exponentialRampToValueAtTime(370, now + 0.18);
+
+        gain1.gain.setValueAtTime(0.24, now);
+        gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
+
+        osc1.connect(gain1);
+        gain1.connect(audioCtx.destination);
+
+        osc1.start(now);
+        osc1.stop(now + 0.24);
+
+        setTimeout(() => playTick(0.20, 520), 110);
+    }
 
     let currentRotation = 0;
     let spinning = false;
@@ -783,6 +858,18 @@
         currentRotation = newRot % TAU;
         drawWheel(currentRotation);
 
+        if (audioCtx) {
+            const tickDelay = 35 + (t * 145);
+
+            if (now - lastTickTime > tickDelay) {
+                const pitch = 1180 - (t * 420);
+                const volume = 0.19 - (t * 0.07);
+
+                playTick(volume, pitch);
+                lastTickTime = now;
+            }
+        }
+
         if (t < 1) {
             animFrame = requestAnimationFrame(animateSpin);
         } else {
@@ -791,6 +878,7 @@
 
             const landed = getSetFromRotation(currentRotation);
             updateUI(landed.set);
+            playLandSound();
 
             spinning = false;
             document.getElementById('spinBtn').disabled = false;
@@ -835,6 +923,9 @@
 
     function spinWheel() {
         if (spinning) return;
+
+        initAudio();
+        lastTickTime = 0;
 
         spinning = true;
 
